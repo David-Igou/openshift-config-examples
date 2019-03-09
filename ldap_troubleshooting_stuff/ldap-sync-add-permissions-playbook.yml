@@ -1,0 +1,30 @@
+---
+
+- hosts: masters[0]
+  tasks:
+
+    - name: Creates directory
+      file:
+        path: /root/groupsync
+        state: directory
+        mode: 0770
+
+    - name: Copy groupsync directory to first master
+      copy:
+        src: "{{ inventory_dir }}/path/to/ldap-groupsync-files/"
+        dest: /root/groupsync/
+
+    - name: Add system-admin role to admingroup
+      shell: /usr/bin/oc --config /etc/origin/master/admin.kubeconfig adm groups sync --sync-config=/root/groupsync/ldap-admins-sync.yml --confirm
+
+    - name: Add system-admin role to admingroup
+      shell: /usr/bin/oc --config /etc/origin/master/admin.kubeconfig adm policy add-cluster-role-to-group cluster-admin IT-AUTOMATION-TEAM-WITH-LONGISH-NAME
+
+    - name: remove self provisioner from regular accounts
+      shell: /usr/bin/oc --config /etc/origin/master/admin.kubeconfig patch clusterrolebinding.rbac self-provisioners -p '{"subjects"{{':'}} null}'
+
+    - name: Delete directory
+      file:
+        path: /root/groupsync
+        state: absent
+

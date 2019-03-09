@@ -1,0 +1,24 @@
+# HTPassword, LDAP Auth
+openshift_master_htpasswd_users: {'admin': '$apr1$N1dnidkfjsadfkdsafuFaT0','developer': '$aX2$mIlpydfasdkfjdsafdsYEGk5/'}
+
+# IF multiple providers and same ca, you can still use this. If different cas you have to call it out in identity_providers
+openshift_master_ldap_ca_file: "{{ inventory_dir }}/path/to/CA_LDAP.cer"
+
+openshift_master_identity_providers:
+ - name: 'htpasswd_auth'
+   login: 'true'
+   challenge: 'true'
+   kind: 'HTPasswdPasswordIdentityProvider'
+ - name: 'LDAP Login'
+   login: 'true'
+   challenge: 'true'
+   kind: 'LDAPPasswordIdentityProvider'
+   attributes:
+     id: ['dn']
+     email: ['mail']
+     name: ['cn']
+     preferredUsername: ['sAMAccountName']
+   bindDN: "CN=openshiftbind,OU=Openshift,OU=Devops,DC=myorg,DC=net"
+   bindPassword: "really-good-password"
+   url: 'ldaps://myorg.net:636/DC=myorg,DC=net?sAMAccountName?sub?(&(memberOf=cn=IT-AUTOMATION-TEAM-WITH-LONGISH-NAME,ou=Ldap%20Groups,ou=Micro%20Management,dc=myorg,dc=net))'
+   insecure: false

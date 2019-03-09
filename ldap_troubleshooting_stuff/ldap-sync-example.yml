@@ -1,0 +1,23 @@
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldaps://mycorp.net:636
+insecure: false
+ca: CA_LDAP.cer
+bindDN: "CN=openshiftbind,OU=Openshift,OU=Devops,DC=myorg,DC=net"
+bindPassword: "safdfsadfds"
+rfc2307:
+    groupsQuery:
+        baseDN: "IT-AUTOMATION-TEAM-WITH-LONGISH-NAME,ou=Ldap%20Groups,ou=Micro%20Management,dc=mycorp,dc=net"
+        scope: sub
+        derefAliases: never
+        filter: (objectClass=*)
+        pageSize: 0
+    groupUIDAttribute: dn
+    groupNameAttributes: [ cn ]
+    groupMembershipAttributes: [ member ]
+    usersQuery:
+        scope: sub
+        derefAliases: never
+        pageSize: 0
+    userUIDAttribute: dn
+    userNameAttributes: [ sAMAccountName ]

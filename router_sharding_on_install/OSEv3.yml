@@ -1,0 +1,114 @@
+openshift_node_groups:
+  - name: node-config-master
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+    edits: []
+  - name: node-config-master-crio
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
+  - name: node-config-infra-domain-a
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+      - 'node-role.kubernetes.io/infra-domain-a=true'
+  - name: node-config-infra-domain-b
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+      - 'node-role.kubernetes.io/infra-domain-b=true'
+    edits: []
+  - name: node-config-infra-crio
+    labels:
+      - 'node-role.kubernetes.io/infra=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
+  - name: node-config-compute
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+    edits: []
+  - name: node-config-compute-crio
+    labels:
+      - 'node-role.kubernetes.io/compute=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
+  - name: node-config-master-infra
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
+    edits: []
+  - name: node-config-master-infra-crio
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
+  - name: node-config-all-in-one
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
+      - 'node-role.kubernetes.io/compute=true'
+    edits: []
+  - name: node-config-all-in-one-crio
+    labels:
+      - 'node-role.kubernetes.io/master=true'
+      - 'node-role.kubernetes.io/infra=true'
+      - 'node-role.kubernetes.io/compute=true'
+      - "{{ openshift_crio_docker_gc_node_selector | lib_utils_oo_dict_to_keqv_list | join(',') }}"
+    edits: "{{ openshift_node_group_edits_crio }}"
+
+# Certificate would take the same params as openshift_hosted_router_certificate
+openshift_hosted_routers:
+- name: router-domain-a
+  replicas: 3
+  namespace: default
+  serviceaccount: router
+  selector: "node-role.kubernetes.io/infra-domain-a=true"
+  images: "openshift3/ose-${component}:${version}"
+  certificate: {}
+  extended_validation: true
+  edits:
+  - key: "spec.template.spec.containers[0].env"
+    value:
+      name: "ROUTE_LABELS"
+      value: "router=domain-a"
+    action: "append"
+  - key: spec.strategy.rollingParams.intervalSeconds
+    value: 1
+    action: put
+  - key: spec.strategy.rollingParams.updatePeriodSeconds
+    value: 1
+    action: put
+  - key: spec.strategy.activeDeadlineSeconds
+    value: 21600
+    action: put
+  stats_port: 1936
+  ports:
+  - 80:80
+  - 443:443
+- name: router-domain-b
+  replicas: 3
+  namespace: default
+  serviceaccount: router
+  selector: "node-role.kubernetes.io/infra-domain-b=true"
+  images: "openshift3/ose-${component}:${version}"
+  certificate: {}
+  extended_validation: true
+  edits:
+  - key: "spec.template.spec.containers[0].env"
+    value:
+      name: "ROUTE_LABELS"
+      value: "router=domain-b"
+    action: 'append'
+  - key: spec.strategy.rollingParams.intervalSeconds
+    value: 1
+    action: put
+  - key: spec.strategy.rollingParams.updatePeriodSeconds
+    value: 1
+    action: put
+  - key: spec.strategy.activeDeadlineSeconds
+    value: 21600
+    action: put
+  stats_port: 1936
+  ports:
+  - 80:80
+  - 443:443

@@ -1,0 +1,12 @@
+# This mountes your makes a secret out of your masters ca trust and mounts it in the registry. You might not want to do that in your use case. But, you can modify this to add any ca to --from-file in the secret creation.
+
+---
+- hosts: masters[0]
+  tasks:
+
+    - name: Create ca bundle secret
+      shell: /bin/oc --config /etc/origin/master/admin.kubeconfig create secret generic registry-ca-bundle -n default --from-file=/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem
+
+
+    - name: Add ca bundle secret to docker-registry dc
+      shell: /bin/oc --config /etc/origin/master/admin.kubeconfig set volume dc/docker-registry --add --namespace=default --type=secret --name=registry-ca-bundle --secret-name=registry-ca-bundle --mount-path=/etc/pki/ca-trust/extracted/pem

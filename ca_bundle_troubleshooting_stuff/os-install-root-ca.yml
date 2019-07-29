@@ -1,0 +1,23 @@
+# I use nodes group, so just pass in your openshift inventory
+---
+- hosts: nodes
+  become: yes
+  tasks:
+
+  - name: "Copy Root certificate"
+    copy:
+      src: "{{ playbook_dir}}/certs/my-root-ca.pem"
+      dest: /etc/pki/ca-trust/source/anchors/my-root-ca.pem
+
+#  - name: "Copy sub certificate"
+#    copy:
+#      src: "{{ playbook_dir }}/certs/my-sub-ca.pem"
+#      dest: /etc/pki/ca-trust/source/anchors/my-sub-ca.pem
+
+
+  - name: Update ca trust
+    shell: "update-ca-trust extract"
+
+  - name: Enable ca trust
+    shell: "update-ca-trust enable"
+

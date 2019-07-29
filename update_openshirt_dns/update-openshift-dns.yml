@@ -1,0 +1,19 @@
+---
+- hosts: nodes
+  become: yes
+  tasks:
+
+
+  - name: Copy new upstream DNS file
+    copy:
+      src: "{{ playbook_dir }}/files/origin-upstream-dns.conf"
+      dest: /etc/dnsmasq.d/origin-upstream-dns.conf
+      owner: root
+      group: root
+      mode: 0600
+
+  - name: restart_dnsmasq_service
+    service:
+      name: dnsmasq
+      state: restarted
+
